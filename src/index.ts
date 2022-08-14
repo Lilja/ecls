@@ -1,4 +1,4 @@
-import { createConnection, ProposedFeatures, TextDocumentSyncKind, DiagnosticSeverity, TextDocuments, MarkupKind } from 'vscode-languageserver/node';
+import { createConnection, ProposedFeatures, TextDocumentSyncKind, DiagnosticSeverity, TextDocuments, MarkupKind, CompletionItem, CompletionItemKind } from 'vscode-languageserver/node';
 import type { InitializeParams, InitializeResult, Diagnostic, TextDocumentPositionParams, Hover, MarkupContent } from 'vscode-languageserver/node';
 import { TextDocument } from 'vscode-languageserver-textdocument';
 import { diagnosticsOfIniLines } from "./diagnostics";
@@ -93,6 +93,31 @@ connection.onHover((params: TextDocumentPositionParams): Hover | undefined => {
 		}
 	}
 });
+
+connection.onCompletion(
+  (_textDocumentPosition: TextDocumentPositionParams): CompletionItem[] => {
+    // The pass parameter contains the position of the text document in
+    // which code complete got requested. For the example we ignore this
+    // info and always provide the same completion items.
+    return universalDeclarations.map((k, idx) => {
+      const c: CompletionItem = {
+        label: k.key,
+        kind: CompletionItemKind.Text,
+        data: idx,
+      }
+      return c;
+    })
+  }
+);
+
+connection.onCompletionResolve(
+  (item: CompletionItem): CompletionItem => {
+    item.detail = universalDeclarations[item.data].key
+    item.documentation = universalDeclarations[item.data].description
+    return item;
+  }
+);
+
 
 documents.listen(connection);
 connection.listen();
