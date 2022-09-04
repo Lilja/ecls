@@ -15,7 +15,8 @@
   },
   "scripts": {
     "build": "rm -r dist; esbuild src/index.ts --bundle --outdir=dist --target=node12 --format=cjs",
-    "build-dev": "esbuild src/*.ts --outdir=dist --target=node12 --format=cjs --watch"
+    "build-dev": "esbuild src/*.ts --outdir=dist --target=node12 --format=cjs --watch",
+    "test-dev": "jest --watch"
   },
   "dependencies": {
     "ini": "^3.0.0",

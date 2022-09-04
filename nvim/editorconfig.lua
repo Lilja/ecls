@@ -6,7 +6,7 @@ local util = require 'lspconfig.util'
 local root_files = { '.editorconfig', '.git' }
 return {
   default_config = {
-    cmd = { 'node', '/Users/lilja/code/elsp/dist/index.js', '--stdio' },
+    cmd = { 'node', os.getenv('HOME') .. '/code/ecls/dist/index.js', '--stdio' },
     filetypes = { 'editorconfig' },
     root_dir = function(fname)
       return util.root_pattern(unpack(root_files))(fname)

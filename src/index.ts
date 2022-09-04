@@ -1,9 +1,10 @@
-import { createConnection, ProposedFeatures, TextDocumentSyncKind, DiagnosticSeverity, TextDocuments, MarkupKind, CompletionItem, CompletionItemKind } from 'vscode-languageserver/node';
+import { createConnection, ProposedFeatures, TextDocumentSyncKind, DiagnosticSeverity, TextDocuments, MarkupKind, CompletionItem, CompletionItemKind, DocumentSymbol, SymbolKind } from 'vscode-languageserver/node';
 import type { InitializeParams, InitializeResult, Diagnostic, TextDocumentPositionParams, Hover, MarkupContent } from 'vscode-languageserver/node';
 import { TextDocument } from 'vscode-languageserver-textdocument';
 import { diagnosticsOfIniLines } from "./diagnostics";
 import { parseIniFile, IniLine } from "./parser";
 import { universalDeclarations, Declaration } from "./editorconfig";
+import { documentSymbols } from './documentsymbols';
 
 
 
@@ -24,6 +25,7 @@ connection.onInitialize((params: InitializeParams) => {
 				resolveProvider: true
 			},
 			hoverProvider: true,
+      documentSymbolProvider: true,
 		}
 	};
 
@@ -83,7 +85,7 @@ connection.onHover((params: TextDocumentPositionParams): Hover | undefined => {
 				`# ${key}`,
 				stmt.description,
 				'',
-				'Accepted values:' + acceptedValue(stmt),
+				'Accepted values: ' + acceptedValue(stmt),
 				'',
 				`[Link to editor config wiki](${stmt.link})`
 			].join('\n')
@@ -117,6 +119,15 @@ connection.onCompletionResolve(
     return item;
   }
 );
+
+connection.onDocumentSymbol((x) => {
+  
+  const r = documents.get(x.textDocument.uri)
+  if (r) {
+    const iniLines = parseIniFile(r.getText(), {console: connection.console})
+    return [...documentSymbols(iniLines)]
+  }
+})
 
 
 documents.listen(connection);
