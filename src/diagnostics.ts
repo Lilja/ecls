@@ -2,8 +2,8 @@ import { DeclarationRequest, DiagnosticSeverity } from 'vscode-languageserver/no
 import type { Diagnostic } from 'vscode-languageserver/node';
 import type { IniLine } from "./parser";
 import type { Declaration } from "./editorconfig";
-import { universalDeclarations } from "./editorconfig";
 import { Failure, Success, Result, isFailure } from "./utils";
+import { declarations } from './settings';
 
 function containsNonLatinCodepoints(s: string) {
   return /[^\u0000-\u00ff]/.test(s);
@@ -78,7 +78,7 @@ export function validateDeclaration(
 }
 
 export function findMatchingDeclarationFromKey(key: string): Declaration | null {
-  const r = universalDeclarations.find(k => k.key == key.trim())
+  const r = declarations().find(k => k.key == key.trim())
   if (typeof r === "undefined") {
     return null;
   }
@@ -191,8 +191,6 @@ export function diagnosticsOfIniLines(
   return diagnostics;
 }
 
-// lol()
-//
 export const requiredValue = (d: Declaration): string => {
   if (d.value) {
     return simplePluralize(d.value)

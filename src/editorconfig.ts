@@ -41,6 +41,11 @@ const positiveInteger = {
 		}
 	}
 };
+const off = {
+  description: "Off",
+	validation: (x: string) => x === "off"
+}
+
 type Validation = {
 	description: string,
 	validation: (value: string, line: IniLine) => boolean,
@@ -94,13 +99,12 @@ export const universalDeclarations: Declaration[] = [{
 	validation: [anyBoolean],
 	link: "https://editorconfig.org/",
 	special_validation: [canNotBeInASection],
-}
-];
+}];
 
 export const limited: Declaration[] = [{
 	key: "max_line_length",
 	description: "Forces hard line wrapping after the amount of characters specified. off to turn off this feature (use the editor settings).",
 	link: "https://github.com/editorconfig/editorconfig/wiki/EditorConfig-Properties#max_line_length",
-	validation: [positiveInteger],
+	validation: [positiveInteger, off],
 }];
 

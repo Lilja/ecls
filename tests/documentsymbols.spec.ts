@@ -6,7 +6,7 @@ const edc = `
 indent_size = 2
 `
 
-describe.only('documentSymbols', () => {
+describe('documentSymbols', () => {
   test('documentSymbols #1', () => {
     const ini = parseIniFile(edc, {console})
     const res = [...documentSymbols(ini)]

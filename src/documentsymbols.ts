@@ -24,14 +24,12 @@ export function* documentSymbols(
   lines: IniLine[],
 ) {
   const indices = findRootDeclarationAndSectionIndices(lines);
-  console.log("Indices", indices);
   for (const index of findRootDeclarationAndSectionIndices(lines)) {
     const startRange: DocumentSymbol["range"]["start"] = {
         line: index,
         character: 0,
     }
     const k = lines[index];
-    console.log("Row", k);
     const children: DocumentSymbol[] = [];
     if (k.is_comment || k.raw == "") {
       continue;
@@ -44,7 +42,6 @@ export function* documentSymbols(
       }
     }
     if (!k.is_section) {
-      console.log("Yielding early!")
       yield {
         range,
         kind: SymbolKind.Field,
@@ -59,7 +56,6 @@ export function* documentSymbols(
     let next = lines[index + localIndex]
     let lastIndex = 0;
     while (next.section_group) {
-      console.log("loop", index, localIndex, next)
       const childRange: DocumentSymbol["range"] = {
         start: {
           line: index + localIndex,
@@ -77,7 +73,6 @@ export function* documentSymbols(
         kind: SymbolKind.Field,
       }
       children.push(d)
-      console.log("Doc", d)
       localIndex++;
       next = lines[index + localIndex]
       lastIndex = index + localIndex;
