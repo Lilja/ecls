@@ -6,7 +6,7 @@ import { Failure, Success, Result, isFailure } from "./utils";
 import { declarations } from './settings';
 
 function containsNonLatinCodepoints(s: string) {
-  return /[^\u0000-\u00ff]/.test(s);
+  return /[^\u0000-\u00ff]/.exec(s);
 }
 
 function currentLineRange(
@@ -170,12 +170,34 @@ function* analyzeSection(line: IniLine, row: number) {
   }
 }
 
+const nonLatinDiagnostics = (character: number, row: number): Diagnostic => {
+  return {
+    message: "Non-latin character found",
+    severity: DiagnosticSeverity.Warning,
+    range: {
+      start: {
+        character: character,
+        line: row,
+      },
+      end: {
+        character: character + 1,
+        line: row,
+      }
+    }
+
+  }
+}
+
 export function diagnosticsOfIniLines(
   lines: IniLine[]
 ): Diagnostic[] {
   let diagnostics: Diagnostic[] = [];
 
   lines.map((line, row) => {
+    const nonLatinCheck = containsNonLatinCodepoints(line.raw)
+    if (nonLatinCheck) {
+      diagnostics.push(nonLatinDiagnostics(nonLatinCheck.index, row))
+    }
     if (line.raw.includes("=")) {
       for (const k of analyzeLine(line, row)) {
         diagnostics.push(k)

@@ -1,5 +1,5 @@
 import { IniLine } from "../src/parser";
-import { validateDeclaration, balancedBrackets } from "../src/diagnostics";
+import { validateDeclaration, balancedBrackets, diagnosticsOfIniLines } from "../src/diagnostics";
 import {
   universalDeclarations,
 } from "../src/editorconfig";
@@ -72,6 +72,18 @@ test('root', () => {
       section_group: null,
     }
   ).tag).toBe('success')
+})
+
+test('nonLatinCheck', () => {
+  const line = {
+    raw: "😀",
+    is_comment: false,
+    is_section: false,
+    section_group: null,
+  }
+  const diag = diagnosticsOfIniLines([line])
+  expect(diag.length).toBe(1)
+  expect(diag[0].message.includes("Non-latin"))
 })
 
 test('brackets are balanced', () => {
