@@ -25,14 +25,13 @@ function currentLineRange(
   }
 }
 
-const simplePluralize = (x: string[]) => {
+export const simplePluralize = (x: string[]) => {
   if (x.length == 1) {
     const ref = x[0][0].toLowerCase() + x[0].slice(1)
     return `Must be ${ref}`
   } else {
     return `Must be either ${x.join(', ')}`
   }
-
 }
 
 export function validateDeclaration(
@@ -78,7 +77,7 @@ export function validateDeclaration(
   return new Success(true);
 }
 
-function findMatchingDeclarationFromKey(key: string): Declaration | null {
+export function findMatchingDeclarationFromKey(key: string): Declaration | null {
   const r = universalDeclarations.find(k => k.key == key.trim())
   if (typeof r === "undefined") {
     return null;
@@ -190,4 +189,16 @@ export function diagnosticsOfIniLines(
     }
   });
   return diagnostics;
+}
+
+// lol()
+//
+export const requiredValue = (d: Declaration): string => {
+  if (d.value) {
+    return simplePluralize(d.value)
+  } else if (d.validation) {
+    return simplePluralize(d.validation.map(k => k.description))
+  } else {
+    throw new Error("No such thing.")
+  }
 }

@@ -1,7 +1,7 @@
-import { createConnection, ProposedFeatures, TextDocumentSyncKind, DiagnosticSeverity, TextDocuments, MarkupKind, CompletionItem, CompletionItemKind, DocumentSymbol, SymbolKind } from 'vscode-languageserver/node';
-import type { InitializeParams, InitializeResult, Diagnostic, TextDocumentPositionParams, Hover, MarkupContent } from 'vscode-languageserver/node';
+import { createConnection, ProposedFeatures, TextDocumentSyncKind, DiagnosticSeverity, TextDocuments, MarkupKind, CompletionItem, CompletionItemKind, DocumentSymbol, SymbolKind, SignatureHelpRequest, SignatureHelp } from 'vscode-languageserver/node';
+import type { InitializeParams, InitializeResult, Diagnostic, TextDocumentPositionParams, Hover, MarkupContent, SignatureHelpParams } from 'vscode-languageserver/node';
 import { TextDocument } from 'vscode-languageserver-textdocument';
-import { diagnosticsOfIniLines } from "./diagnostics";
+import { diagnosticsOfIniLines, findMatchingDeclarationFromKey, requiredValue } from "./diagnostics";
 import { parseIniFile, IniLine } from "./parser";
 import { universalDeclarations, Declaration } from "./editorconfig";
 import { documentSymbols } from './documentsymbols';
@@ -26,6 +26,9 @@ connection.onInitialize((params: InitializeParams) => {
 			},
 			hoverProvider: true,
       documentSymbolProvider: true,
+      signatureHelpProvider: {
+        triggerCharacters: ["a","b","i","r"],
+      },
 		}
 	};
 
@@ -96,14 +99,43 @@ connection.onHover((params: TextDocumentPositionParams): Hover | undefined => {
 	}
 });
 
+connection.onSignatureHelp(
+  (what: SignatureHelpParams) => {
+    const doc = documents.get(what.textDocument.uri)
+    if (typeof doc !== "undefined") {
+      const iniLines = parseIniFile(doc.getText(), {console: connection.console})
+      const line = iniLines[what.position.line]
+      if (line.is_comment || line.is_section) {
+        return undefined;
+      }
+
+      const key = line.raw.split("=")[0]
+      const declaration = findMatchingDeclarationFromKey(key)
+      if (declaration) {
+        const c: SignatureHelp = {
+          signatures: [{
+            label: requiredValue(declaration),
+          }],
+
+        }
+        return c
+
+      }
+    }
+
+})
 connection.onCompletion(
   (_textDocumentPosition: TextDocumentPositionParams): CompletionItem[] => {
     // The pass parameter contains the position of the text document in
     // which code complete got requested. For the example we ignore this
     // info and always provide the same completion items.
+    //const iniLines = parseIniFile(_textDocumentPosition.textDocument.uri.getText(), {console: connection.console})
+    //const line = iniLines[_textDocumentPosition.position.line]
+
     return universalDeclarations.map((k, idx) => {
       const c: CompletionItem = {
         label: k.key,
+        insertText: k.key + " = ",
         kind: CompletionItemKind.Text,
         data: idx,
       }
