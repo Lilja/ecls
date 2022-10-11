@@ -17,11 +17,11 @@ return {
   },
   docs = {
     description = [[
-https://github.com/regen100/cmake-language-server
-CMake LSP Implementation
+https://github.com/Lilja/ecls
+Editorconfig language server
 ]],
     default_config = {
-      root_dir = [[root_pattern('.git', '.editorconfig')]],
+      root_dir = [[root_pattern('.editorconfig')]],
     },
   },
 }
