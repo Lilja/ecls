@@ -10,7 +10,8 @@ A language server for Editor config(ecls).
 
 ## Installation
 ### VsCode
-Install browser extension Editorconfig language server
+To be determined
+
 
 ### Neovim
 `npm install -g ecls`
