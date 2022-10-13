@@ -14,7 +14,6 @@ export function parseIniFile(file: string, connection: Connection): IniLine[] {
 
 	let section_group: null | string = null;
 	return file.split("\n").map(rawLine => {
-		// connection.console.log("ecls " + rawLine);
 		let is_comment = false;
 		let is_section = false;
 		const trimmedLine = rawLine.trim();

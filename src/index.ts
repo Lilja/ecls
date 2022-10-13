@@ -12,10 +12,11 @@ import {parseSettings, declarations, EditorConfigParams} from "./settings";
 const connection = createConnection(ProposedFeatures.all);
 const documents: TextDocuments<TextDocument> = new TextDocuments(TextDocument);
 const state: Record<string, IniLine[]> = {};
+const version = process.env.VERSION as string;
 
 
 connection.onInitialize((params: InitializeParams) => {
-  connection.console.log('Tjong från ecLS');
+  connection.console.log(`ecls init ${version}`);
   params.capabilities.notebookDocument
   parseSettings(params.initializationOptions as EditorConfigParams)
 
@@ -43,11 +44,10 @@ function validateTextDocument(textDocument: TextDocument): void {
   try {
     const iniLines = parseIniFile(textDocument.getText(), connection);
     diagnostics = diagnosticsOfIniLines(iniLines);
-    connection.console.log("ecls diag!" + JSON.stringify(diagnostics));
     connection.sendDiagnostics({ uri: textDocument.uri, diagnostics });
     state[textDocument.uri] = iniLines
   } catch (e) {
-    connection.console.log(`wtf ${e}`);
+    connection.console.log(`Error validating document ${e}`);
     diagnostics.push({
       severity: DiagnosticSeverity.Error,
       range: {
@@ -74,7 +74,6 @@ const acceptedValue = (statement: Declaration) => {
 };
 
 connection.onHover((params: TextDocumentPositionParams): Hover | undefined => {
-  connection.console.log("ecls hover!" + JSON.stringify(params));
   if (state[params.textDocument.uri]) {
     const iniLines = state[params.textDocument.uri];
     const line = iniLines[params.position.line];
